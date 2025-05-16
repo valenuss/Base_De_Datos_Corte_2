@@ -1,6 +1,5 @@
 const { UserRole, User, Role } = require("../models"); // asegúrate que el index.js exporta todo
 const { successResponse, errorResponse } = require("../utils/response");
-
 const createUserRole = async (req, res) => {
   try {
     const { user_id, role_id } = req.body;

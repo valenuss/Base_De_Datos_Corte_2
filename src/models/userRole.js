@@ -1,10 +1,6 @@
 const { Sequelize, Model, DataTypes } = require("sequelize");
 const sequelize = require("../db/db");
-
-// Modelo Post 
 const Post = require("./post.model");
-
-// Modelo User
 const User = sequelize.define("User", {
   id: {
     type: DataTypes.UUID,

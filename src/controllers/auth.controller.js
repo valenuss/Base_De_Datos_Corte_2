@@ -4,62 +4,56 @@ const response = require("../red/response");
 const bcrypt = require("bcrypt");
 const auth = require("../auth");
 
-// Iniciar sesión
-const login = async (req, res, next) => {
-  const { email, password } = req.body;
-
+async function login(req, res, next) {
+  let email = req.body.email;
+  let password = req.body.password;
   try {
-    // Buscar Auth por email
     const data = await Auth.findOne({ where: { email } });
-    if (!data) throw new Error("Auth record not found");
-
-    // Buscar el usuario vinculado (relación 1:1)
-    const user = await User.findOne({ where: { id: data.id } });
-    if (!user) throw new Error("User not found");
-
-    // Validar contraseña
-    const isValid = await bcrypt.compare(password, data.password);
-    if (!isValid) throw new Error("Invalid credentials");
-
-    // Generar token y respuesta
-    const resp = {
-      token: auth.assignToken({ id: data.id, email: data.email }),
-      user: user,
-    };
-
+    const user = await User.findOne({ where: { email } });
+    const resp = await validatePassword(password, data.password, data, user);
     response.success(req, res, resp, 200);
   } catch (error) {
     next(error);
   }
-};
+}
 
-// Crear una cuenta de autenticación
 const create = async (req, res, next) => {
   try {
-    const { id, email, password } = req.body;
-
+    const data = req.body;
     await Auth.sync();
-
-    const hashedPassword = await bcrypt.hash(password.toString(), 10);
-
-    const createAuth = await Auth.create({
-      id, // clave foránea desde User
-      email,
-      password: hashedPassword,
+    password = await bcrypt.hash(data.password.toString(), 10);
+    createAuth = await Auth.create({
+      id: data.id,
+      email: data.email,
+      password: password,
     });
-
-    const message = {
-      msg: "Auth record was created successfully",
-      authID: createAuth.id,
+    message = {
+      msg: "Record was created successfully",
+      roleID: createAuth.id,
     };
-
     response.success(req, res, message, 201);
   } catch (error) {
     next(error);
   }
 };
 
+const validatePassword = (pass1, pass2, data, user) => {
+  return bcrypt.compare(pass1, pass2).then((res) => {
+    if (res === true) {
+      //generate token
+      data.role_id = user.role_id;
+      var resp = {
+        token: auth.assignToken({ ...data }),
+        user: user,
+      };
+      return resp;
+    } else {
+      throw new Error("invalid information");
+    }
+  });
+};
+
 module.exports = {
-  login,
   create,
+  login,
 };

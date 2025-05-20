@@ -1,5 +1,6 @@
-const router = require ("express").router();
-const controller = require ("../controller/role.controller");
+const express = require ("express");
+const router = express.Router();
+const controller = require ("../controllers/role.controller");
 const validation = require ("../middleware/validation");
 
 router.get("/", controller.getAll);

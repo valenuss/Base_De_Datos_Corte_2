@@ -1,21 +1,19 @@
 const express = require("express");
-const morgan = require("morgan");
 const config = require("../config");
 const cors = require("cors");
 const path = require("path");
 
 const roles = require("../routes/role.routes");
 const users = require("../routes/user.routes");
-const posts = require("../routes/post.routes");
+const userRole = require("../routes/userRole.routes");
 const auth = require("../routes/auth.routes");
 
 // const auth = require("../routes/auth.routes");
-const errorHandler = require("../middlewares/errorHandler");
+const error = require("../middleware/error");
 
 const app = express();
 
 //middlewares
-app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -26,9 +24,9 @@ app.set("port", config.app.port);
 //rutas
 app.use("/api/roles", roles);
 app.use("/api/users", users);
-app.use("/api/posts", posts);
+app.use("/api/user-role", userRole);
 app.use("/api/auth", auth);
-app.use(errorHandler);
+app.use(error);
 
 // public static files
 app.use(express.static(path.join(__dirname, "../../uploads")));
